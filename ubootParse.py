@@ -29,19 +29,31 @@ def main(argv):
 def timeToParse(input, output, debug):
 	f = open(input, 'r')
 	outfile = open(output, 'w')
+	lastoffset = 0
 	while True:
 		line = f.readline()
 		if not line: break
-		if debug == 1: print line[0:9]
+		offset = int(line[0:8], 16)
 		hextoParse = line[10:18] + line[19:27] + line[28:36] + line[37:45]
+		if ((lastoffset >= offset) or (lastoffset + 16 != offset)) and (lastoffset != 0):
+			print "Non-contigous offsets:"
+			print "%08x" % lastoffset
+			print "%08x" % offset
+			sys.exit(2)
+		if len(hextoParse) != 32:
+			print "Corrupted line:"
+			print line
+			sys.exit(2)
 		#hextoParse.replace(' ','')
-		if debug == 1: print hextoParse
+		if debug == 1:
+			print "%08x" % offset
+			print hextoParse
 		b_s = binascii.unhexlify(hextoParse)
 		outfile.write(b_s)
+		lastoffset = offset
 	outfile.close()
 	f.close()
 	print "Finished parsing, now exiting..."
-	print debug
 
 def printhelp():
 	print 'ubootParse.py -i <inputfile> -o <outputfile> -d'
