@@ -4,38 +4,47 @@ import sys, getopt, binascii
 def main(argv):
 	inputfile = ' '
 	outputfile = ' '
+	debug = 0
 	try:
-		opts, args = getopt.getopt(argv, "hi:o:",["ifile=","ofile="])
+		opts, args = getopt.getopt(argv, "dhi:o:",["ifile=","ofile="])
 	except getopt.GetoptError:
-		print 'ubootParse.py -i <inputfile> -o <outputfile>'
+		print "Invalid option, please run as:"
+		printhelp()
 		sys.exit(2)
 	for opt, arg in opts:
 		if opt == '-h':
-			print 'ubootParse.py -i <inputfile> -o <outputfile>'
+			printhelp()
 			sys.exit()
 		elif opt in ("-i"):
 			inputfile = arg
 		elif opt in ("-o"):
 			outputfile = arg
-		print inputfile
-		print outputfile
-		timeToParse(inputfile, outputfile)
+		elif opt in ("-d"):
+			debug = 1
 
-def timeToParse(input, output):
+	print inputfile
+	print outputfile
+	timeToParse(inputfile, outputfile, debug)
+
+def timeToParse(input, output, debug):
 	f = open(input, 'r')
 	outfile = open(output, 'w')
 	while True:
 		line = f.readline()
 		if not line: break
-		print line[0:9]
+		if debug == 1: print line[0:9]
 		hextoParse = line[10:18] + line[19:27] + line[28:36] + line[37:45]
 		#hextoParse.replace(' ','')
-		print hextoParse
+		if debug == 1: print hextoParse
 		b_s = binascii.unhexlify(hextoParse)
 		outfile.write(b_s)
 	outfile.close()
 	f.close()
 	print "Finished parsing, now exiting..."
+	print debug
+
+def printhelp():
+	print 'ubootParse.py -i <inputfile> -o <outputfile> -d'
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
